@@ -231,7 +231,7 @@ function GearScore_GetItemCode(ItemLink)
 	if not ( ItemLink ) then return nil; end
 	local found, _, ItemString = string.find(ItemLink, "^|c%x+|H(.+)|h%[.*%]"); local Table = {}
 	for v in string.gmatch(ItemString, "[^:]+") do tinsert(Table, v); end
-	return Table[2]..":"..Table[3], Table[2]
+	return Table[2]..":"..Table[3]..":"..Table[4]..":"..Table[5]..":"..Table[6], Table[2]
 end
 
 -------------------------- Get Mouseover Score -----------------------------------

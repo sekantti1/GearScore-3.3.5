@@ -5,7 +5,8 @@ function CalculateCustomWeightScore(ItemLink, Tooltip)
 	local ItemName, ItemLink, ItemRarity, ItemLevel, ItemMinLevel, ItemType, ItemSubType, ItemStackCount, ItemEquipLoc, ItemTexture = GetItemInfo(ItemLink)
 	local Class = "ShamanCustomWeights"
 	local SumOfStats = 0
-	local GS_TempBonuses = BonusScanner:ScanItem(ItemLink)
+	--local GS_TempBonuses = BonusScanner:ScanItem(ItemLink)
+	local GS_TempBonuses = {}
 	local TotalDivisor = 0
 	for j,w in ipairs(GearScoreClassSpecList[Class]) do
 		TotalDivisor = 0
@@ -29,7 +30,8 @@ for j = 1, 18 do
 		local ItemName, ItemLink, ItemRarity, ItemLevel, ItemMinLevel, ItemType, ItemSubType, ItemStackCount, ItemEquipLoc, ItemTexture = GetItemInfo(GetInventoryItemLink("target", j))
 		if ( ItemLink ) then
 		print("ItemNumber:", j)
-			local GS_TempBonuses = BonusScanner:ScanItem(ItemLink)
+			--local GS_TempBonuses = BonusScanner:ScanItem(ItemLink)
+			local GS_TempBonuses = {}
     		if GS_TempBonuses then
 				for i,v in pairs(GS_TempBonuses) do
 					GS_TempBonuses[i] = ( GS_TempBonuses[i] * (GearScoreClassStats[i] or 0 ) ) ^ 1.7095
@@ -50,7 +52,8 @@ function CalculateClasicItemScore_two(ItemLink, Tooltip, Red, Green, Blue)
 	local ItemName, ItemLink, ItemRarity, ItemLevel, ItemMinLevel, ItemType, ItemSubType, ItemStackCount, ItemEquipLoc, ItemTexture = GetItemInfo(ItemLink)
 	local Class, englishClass = UnitClass("player")
 	local SumOfStats = 0
-	local GS_TempBonuses = BonusScanner:ScanItem(ItemLink)
+	--local GS_TempBonuses = BonusScanner:ScanItem(ItemLink)
+	local GS_TempBonuses = {}
 	for j,w in ipairs(GearScoreClassSpecList[Class]) do
 	SumOfStats = 0
 		if ( GS_TempBonuses ) then 
@@ -79,7 +82,8 @@ end
 
 function Calculate_GearScoreClasicScore(ItemLink, Class, Index)
 	local ItemName, ItemLink, ItemRarity, ItemLevel, ItemMinLevel, ItemType, ItemSubType, ItemStackCount, ItemEquipLoc, ItemTexture = GetItemInfo(ItemLink)
-	local GS_TempBonuses = BonusScanner:ScanItem(ItemLink)
+	--local GS_TempBonuses = BonusScanner:ScanItem(ItemLink)
+	local GS_TempBonuses = {}
 	if ( ItemEquipLoc == "INVTYPE_TRINKET" ) or ( ItemEquipLoc == "INVTYPE_RELIC" ) or ( ItemEquipLoc == "INVTYPE_SHIELD" ) or ( ItemEquipLoc == "INVTYPE_HOLDABLE" ) then
 		local SumOfNegativeStats = 0
 		for i,v in pairs(GS_TempBonuses) do
@@ -103,7 +107,8 @@ function Calculate_GearScoreClasicScore(ItemLink, Class, Index)
 		local StartPosition, EndPosition, FirstWord, RestOfString = string.find(ItemText, ":", 7)
 		ItemText = "item:33430"..string.sub(ItemText, StartPosition)
 		local ItemName, ItemLink, ItemRarity, ItemLevel, ItemMinLevel, ItemType, ItemSubType, ItemStackCount, ItemEquipLoc, ItemTexture = GetItemInfo(ItemText)
-		GS_TempBonuses = BonusScanner:ScanItem(ItemLink) 
+		--GS_TempBonuses = BonusScanner:ScanItem(ItemLink) 
+		GS_TempBonuses = {}
 		if (GS_TempBonuses) then
 			for i,v in pairs(GS_TempBonuses) do
 			 	SumOfStats = SumOfStats + ((GearScoreSpecWeights[Class][Index][i] or 0 ) * (( v * (GearScoreClassStats[i] or 0 ) ) ^ 1.7095))
@@ -126,7 +131,8 @@ function Calculate_GearScoreClasicScore(ItemLink, Class, Index)
 		local StartPosition, EndPosition, FirstWord, RestOfString = string.find(ItemText, ":", 7)
 		ItemText = "item:4025"..string.sub(ItemText, StartPosition)
 		local ItemName, ItemLink, ItemRarity, ItemLevel, ItemMinLevel, ItemType, ItemSubType, ItemStackCount, ItemEquipLoc, ItemTexture = GetItemInfo(ItemText)
-		GS_TempBonuses = BonusScanner:ScanItem(ItemLink) 
+		--GS_TempBonuses = BonusScanner:ScanItem(ItemLink)
+		GS_TempBonuses = {} 
 		if (GS_TempBonuses) then
 			for i,v in pairs(GS_TempBonuses) do
 			 	SumOfStats = SumOfStats + ((GearScoreSpecWeights[Class][Index][i] or 0 ) * (( v * (GearScoreClassStats[i] or 0 ) ) ^ 1.7095))
@@ -180,7 +186,8 @@ function GearScoreClassScan(Name)
 					local ItemName, ItemLink, ItemRarity, ItemLevel, ItemMinLevel, ItemType, ItemSubType, ItemStackCount, ItemEquipLoc, ItemTexture = GetItemInfo(GetInventoryItemLink("target", i))
 					if ( ItemLink ) then
 					
-						MetaGemMissing, RedGemMissing, BlueGemMissing, YellowGemMissing = BonusScanner:GetEmptySockets(ItemLink)
+						--MetaGemMissing, RedGemMissing, BlueGemMissing, YellowGemMissing = BonusScanner:GetEmptySockets(ItemLink)
+						MetaGemMissing, RedGemMissing, BlueGemMissing, YellowGemMissing = 0, 0, 0, 0
 						MissingGemCount = MissingGemCount + MetaGemMissing + RedGemMissing + BlueGemMissing + YellowGemMissing	
 							
 						if ( MetaGemMissing > 0 ) or ( BlueGemMissing > 0 ) or ( YellowGemMissing > 0 ) or ( RedGemMissing > 0 )then 
@@ -201,7 +208,8 @@ function GearScoreClassScan(Name)
 						if ( ItemSubString == "0" ) and ( GS_ItemTypes[ItemEquipLoc]["Enchantable"] )then
 							 table.insert(MissingEnchantTable, ItemEquipLoc)
 						end
-						local GS_TempBonuses = BonusScanner:ScanItem(ItemLink)
+						--local GS_TempBonuses = BonusScanner:ScanItem(ItemLink)
+						local GS_TempBonuses = {}
     					if GS_TempBonuses then
 							for i,v in pairs(GS_TempBonuses) do
 								if ( PlayersSumBonuses[i] ) then PlayersSumBonuses[i] = PlayersSumBonuses[i] + v else PlayersSumBonuses[i] = v; end
@@ -217,7 +225,8 @@ function GearScoreClassScan(Name)
 		        	SubLink = (string.sub(SubLink, 1, (string.find(SubLink, ":")) - 1))
 					local ItemName, ItemLink, ItemRarity, ItemLevel, ItemMinLevel, ItemType, ItemSubType, ItemStackCount, ItemEquipLoc, ItemTexture = GetItemInfo("item:"..SubLink)
 					if ( ItemLink ) then
-						local GS_TempBonuses = BonusScanner:ScanItem(ItemLink)
+						--local GS_TempBonuses = BonusScanner:ScanItem(ItemLink)
+						local GS_TempBonuses = {}
     					if GS_TempBonuses then
 							for i,v in pairs(GS_TempBonuses) do
 								if ( PlayersSumBonuses[i] ) then PlayersSumBonuses[i] = PlayersSumBonuses[i] + v else PlayersSumBonuses[i] = v; end

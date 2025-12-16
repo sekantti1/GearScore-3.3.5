@@ -2,7 +2,7 @@
 
 -------------------------------------------------------------------------------
 --                              GearScore                                    --
---                            Version 3.1.20                                --
+--                            Version 3.1.21                                --
 --								Mirrikat45                                   --
 -------------------------------------------------------------------------------
 
@@ -158,9 +158,8 @@ function GearScore_OnEvent(GS_Nil, GS_EventName, GS_Prefix, GS_AddonMessage, GS_
   			GS_Settings["Developer"] = 0; GS_VersionNum = 30119; GS_Settings["OldVer"] = GS_VersionNum
   			for i, v in pairs(GS_DefaultSettings) do if not ( GS_Settings[i] ) then GS_Settings[i] = GS_DefaultSettings[i]; end; end
   			if ( GS_Settings["AutoPrune"] == 1 ) then GearScore_Prune(); end
-			if ( GS_Settings["Developer"] == 0 ) then print("Welcome to GearScore 3.1.20. Type /gs to visit options and turn off help."); end
-			print("|cffFF1E00GearScore:|r There is currently a bug in which the UI will stop responding to inspection requests. This is not a bug caused by GearScore, but is a bug in the client. Blizzard is aware of the bug and a fix should be implimented shortly.");
-			if ( GS_Settings["Developer"] == 1 ) then print("Welcome to GearScore 3.1.20. This is a test version. Please provide feedback at www.GearScoreAddon.com"); end
+			if ( GS_Settings["Developer"] == 0 ) then print("Welcome to GearScore 3.1.21. Type /gs to visit options and turn off help."); end
+			if ( GS_Settings["Developer"] == 1 ) then print("Welcome to GearScore 3.1.21. This is a test version. Please provide feedback at www.GearScoreAddon.com"); end
   			if ( GS_Settings["Restrict"] == 1 ) then GearScore_SetNone(); end
   			if ( GS_Settings["Restrict"] == 2 ) then GearScore_SetLight(); end
   			if ( GS_Settings["Restrict"] == 3 ) then GearScore_SetHeavy(); end
@@ -838,7 +837,10 @@ function GS_SCANSET(Command)
 		GS_GearFrame:Show(); GS_NotesFrame:Hide(); GS_DefaultFrame:Show(); GS_ExPFrame:Hide()
 		GS_GearScoreText:Show(); GS_LocationText:Show(); GS_DateText:Show(); GS_AverageText: Show();
 		
-	    if ( UnitName("target") ) and ( Command == "" ) then 
+		if ( Command == "party" ) or ( Command == "raid" ) or ( Command == "group" ) then 
+			--GearScore_BuildDatabase("Party", Auto);
+			GearScore_HideDatabase(); GearScore_DisplayDatabase("Party", SortType); PanelTemplates_SetTab(GS_DatabaseFrame, 1)
+		elseif ( UnitName("target") ) and ( Command == "" ) then 
 		 	 if not ( UnitIsPlayer("target") ) then GearScore_DisplayUnit(UnitName("player")) else GearScore_DisplayUnit(UnitName("target")); end
 	    else
          	if ( Command == "" ) then Command = UnitName("player"); end
@@ -1166,17 +1168,36 @@ function GearScore_HideDatabase(erase)
  function GearScore_BuildDatabase(Group, Auto)
  	--print("Compiling Database")
  	local count = 1; local GSL_DataBase = {}
+
+	local avg_GearScore = 0;
+	local avg_GearScoreSum = 0;
+	local avg_GearScoreAmount = 0;
+	--GSDatabaseAvgGearScore:SetText("Avg GearScore: n/a");
  	if ( Group == "Party" ) then 
 	    if ( UnitName("raid1") ) then GroupType = "raid"; PartySize = 40; else GroupType = "party"; PartySize = 5; end
 	    count = 0; for i = 1, PartySize do 
 			if ( GS_Data[GetRealmName()].Players[UnitName(GroupType..i)] ) then 
 				count = count + 1; GSL_DataBase[count] = GS_Data[GetRealmName()].Players[UnitName(GroupType..i)]; 
+				if GS_Data[GetRealmName()].Players[UnitName(GroupType..i)].GearScore then
+						avg_GearScoreSum = avg_GearScoreSum + GS_Data[GetRealmName()].Players[UnitName(GroupType..i)].GearScore
+						avg_GearScoreAmount = avg_GearScoreAmount + 1;
+				end;
 			else
 				--GearScore_Request(UnitName(GroupType..i))
 			end; 
 		end
+
+		if (avg_GearScoreAmount > 1) then
+			avg_GearScore = avg_GearScoreSum / avg_GearScoreAmount;
+			avg_GearScore = round_number(avg_GearScore);
+			GSDatabaseAvgGearScore:SetText("Avg GearScore: "..avg_GearScore);
+		else
+			avg_GearScore = GS_Data[GetRealmName()].Players[UnitName("player")].GearScore
+			GSDatabaseAvgGearScore:SetText("Avg GearScore: "..avg_GearScore);
+		end;
 		if ( GroupType == "party" ) then GSL_DataBase[count+1] = GS_Data[GetRealmName()].Players[UnitName("player")]; end
 	end
+
 	if ( Group == "All" ) then count = 0;
 		for i,v in pairs(GS_Data[GetRealmName()].Players) do
             if ( GS_Settings["AutoPrune"] == 1 ) then
@@ -1189,17 +1210,58 @@ function GearScore_HideDatabase(erase)
 			count = count+1; GSL_DataBase[count] = v;
 			end
 		end;
+		avg_GearScore = 0;
+		GSDatabaseAvgGearScore:SetText("Avg GearScore: n/a");
 	end
 
-	if ( Group == "Guild" ) then
-	GuildRoster(); for i = 1, GetNumGuildMembers(1) do	if ( GS_Data[GetRealmName()].Players[GetGuildRosterInfo(i)] ) then GSL_DataBase[count] = GS_Data[GetRealmName()].Players[GetGuildRosterInfo(i)]; count = count + 1; end; end; end
- if ( Group == "Search" ) then count = 0; for i,v in pairs(GS_Data[GetRealmName()].Players) do local DataString = tostring(v.GearScore..v.Name..v.Level..v.Guild..GS_Classes[v.Class]..GS_Races[v.Race]); if string.find(strlower(DataString), strlower(GS_SearchXBox:GetText())) then count = count + 1; GSL_DataBase[count] = v; end; end; end
-    if ( Group == "Friends" ) then GuildRoster(); for i = 1, GetNumFriends(1) do	if ( GS_Data[GetRealmName()].Players[GetFriendInfo(i)] ) then GSL_DataBase[count] = GS_Data[GetRealmName()].Players[GetFriendInfo(i)]; count = count + 1; end; end; end
+	if ( Group == "Guild" ) then 
+		GuildRoster(); 
+		for i = 1, GetNumGuildMembers(1) do	
+			if ( GS_Data[GetRealmName()].Players[GetGuildRosterInfo(i)] ) then 
+				GSL_DataBase[count] = GS_Data[GetRealmName()].Players[GetGuildRosterInfo(i)]; count = count + 1; 
+					if GS_Data[GetRealmName()].Players[GetGuildRosterInfo(i)].GearScore then
+						avg_GearScoreSum = avg_GearScoreSum + GS_Data[GetRealmName()].Players[GetGuildRosterInfo(i)].GearScore
+						avg_GearScoreAmount = avg_GearScoreAmount + 1;
+					end;
+			end; 
+		end; 
+		avg_GearScore = avg_GearScoreSum / avg_GearScoreAmount;
+		avg_GearScore = round_number(avg_GearScore)
+		GSDatabaseAvgGearScore:SetText("Avg GearScore: "..avg_GearScore);
+	end
+
+	if ( Group == "Search" ) then count = 0; 
+		for i,v in pairs(GS_Data[GetRealmName()].Players) do 
+			local DataString = tostring(v.GearScore..v.Name..v.Level..v.Guild..GS_Classes[v.Class]..GS_Races[v.Race]); 
+			if string.find(strlower(DataString), strlower(GS_SearchXBox:GetText())) then 
+				count = count + 1; GSL_DataBase[count] = v; end; end; end
+
+    if ( Group == "Friends" ) then GuildRoster(); 
+		for i = 1, GetNumFriends(1) do	
+			if ( GS_Data[GetRealmName()].Players[GetFriendInfo(i)] ) then 
+				GSL_DataBase[count] = GS_Data[GetRealmName()].Players[GetFriendInfo(i)]; count = count + 1; 
+				if GS_Data[GetRealmName()].Players[GetFriendInfo(i)].GearScore then
+						avg_GearScoreSum = avg_GearScoreSum + GS_Data[GetRealmName()].Players[GetFriendInfo(i)].GearScore
+						avg_GearScoreAmount = avg_GearScoreAmount + 1;
+					end;
+			end; 
+		end; 
+		avg_GearScore = avg_GearScoreSum / avg_GearScoreAmount;
+		avg_GearScore = round_number(avg_GearScore)
+		GSDatabaseAvgGearScore:SetText("Avg GearScore: "..avg_GearScore);
+	end
 	
 	if Group == "All" then GSDatabaseInfoString:SetText("Database: "..count.." entries. (Approx "..floor(0.8372131704586988304093567251462 * count).."Kb)"); GS_Settings["DatabaseSize"] = count;
+
 	else if GS_Settings["DatabaseSize"] then GSDatabaseInfoString:SetText("Database: "..GS_Settings["DatabaseSize"].." entries. (Approx "..floor(0.8372131704586988304093567251462 * GS_Settings["DatabaseSize"]).."Kb)"); end
 	end
 	return GSL_DataBase
+end
+
+function round_number(number) 
+  local precision = math.pow(10, -1)
+  number = number + (precision / 2);
+  return math.floor(number / precision) * precision
 end
 
  function GearScore_ShowReport()
@@ -1257,7 +1319,7 @@ end
 function GearScore_DatabaseOnClick(Event, Cell, Misc, Button)
 	--LibQTip:Release(GearScoreTooltip)
 	if ( Button == "RightButton" ) and ( Cell["_line"] > 2 ) and ( Cell["_column"] == 3 ) and ( GSX_DataBase[Cell["_line"]-2+GS_StartPage] )	then ChatFrameEditBox:Show(); ChatFrameEditBox:Insert("/t "..GSX_DataBase[Cell["_line"]-2+GS_StartPage].Name.." "); return; end
-	
+
 	if ( Cell["_line"] == 1 ) and ( Cell["_column"] == 2 ) then GearScore_DisplayDatabase(GS_DisplayedGroup, "GearScore", nil, GS_StartPage); return; end
 	if ( Cell["_line"] == 1 ) and ( Cell["_column"] == 3 ) then GearScore_DisplayDatabase(GS_DisplayedGroup, "Name", nil, GS_StartPage); return; end
 	if ( Cell["_line"] == 1 ) and ( Cell["_column"] == 4 ) then GearScore_DisplayDatabase(GS_DisplayedGroup, "iLevel", nil, GS_StartPage); return; end

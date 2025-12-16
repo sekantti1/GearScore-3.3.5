@@ -1440,7 +1440,7 @@
 		</Frames>
 		<Layers>
 			<Layer level="OVERLAY">
-				<FontString name="GS_FontString1" inherits="GameFontNormal" text="GearScore Version 3.1.20 (Release)" justifyH="LEFT">
+				<FontString name="GS_FontString1" inherits="GameFontNormal" text="GearScore Version 3.1.21 (Release)" justifyH="LEFT">
 					<Size>
 						<AbsDimension x="301" y="20" />
 					</Size>
@@ -2161,6 +2161,9 @@
 			<Layer level="OVERLAY">
 				<FontString name="GSDatabaseInfoString" inherits="GameFontNormal" text="Database: Unknown. (Appox. ??kb)" justifyH="LEFT">
 				<Anchors><Anchor point="TOPLEFT"><Offset x="30" y="-434" /></Anchor></Anchors>
+				</FontString>
+				<FontString name="GSDatabaseAvgGearScore" inherits="GameFontNormal" text="Avg GearScore: Unknown" justifyH="LEFT">
+				<Anchors><Anchor point="TOPLEFT"><Offset x="30" y="-420" /></Anchor></Anchors>
 				</FontString>
 			</Layer>
 		</Layers>

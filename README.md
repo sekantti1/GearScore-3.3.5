@@ -1,6 +1,7 @@
 # GearScore-3.3.5:
 
-Full version of the Gearscore addon which includes the database
+Full version of the Gearscore addon which includes the database.
+
 For WoW 3.3.5a
 
 **Whats new:**

@@ -552,19 +552,42 @@ end
 
 ----------------------------- Hook Set Unit -----------------------------------
 function GearScore_HookSetUnit(arg1, arg2)
+	if ( GS_PlayerIsInCombat ) then
+		return
+	end
+	
 	if ( InspectFrame and InspectFrame:IsShown() ) or ( Examiner and Examiner:IsShown() ) then
 		return
 	end
 
-    GS_GearScore = nil; local Name = GameTooltip:GetUnit(); GearScore_GetGroupScores(); local PreviousRecord = {}; 
-    local Age = "*";
-    local Realm = ""; if UnitName("mouseover") == Name then _, Realm = UnitName("mouseover"); if not Realm then Realm = GetRealmName(); end; end
-	if ( CanInspect("mouseover") ) and ( UnitName("mouseover") == Name ) and not ( GS_PlayerIsInCombat ) and ( UnitIsUnit("target", "mouseover") ) then 
+	GS_GearScore = nil; 
+	local Name = GameTooltip:GetUnit(); 
+	GearScore_GetGroupScores(); 
+	local PreviousRecord = {}; 
+	local Age = "*";
+	local Realm = ""; 
+	if UnitName("mouseover") == Name then 
+		_, Realm = UnitName("mouseover"); 
+			if not Realm then 
+				Realm = GetRealmName(); 
+			end; 
+	end
+	if ( CanInspect("mouseover") ) and ( UnitName("mouseover") == Name ) and ( UnitIsUnit("target", "mouseover") ) then 
 		Age = "";
-		if (GS_DisplayFrame:IsVisible()) and GS_DisplayPlayer and UnitName("target") then if GS_DisplayPlayer == UnitName("target") then return; end; end			
-		if ( GS_Data[GetRealmName()].Players[Name] ) then PreviousRecord = GS_Data[GetRealmName()].Players[Name]; end 
-		NotifyInspect("mouseover"); GearScore_GetScore(Name, "mouseover"); --GS_Data[GetRealmName()]["CurrentPlayer"] = GS_Data[GetRealmName()]["Players"][Name]
-		if not ( GearScore_IsRecordTheSame(GS_Data[GetRealmName()].Players[Name], PreviousRecord) ) then GearScore_Send(Name, "ALL"); end
+		if (GS_DisplayFrame:IsVisible()) and GS_DisplayPlayer and UnitName("target") then 
+			if GS_DisplayPlayer == UnitName("target") then 
+				return; 
+			end; 
+		end			
+		if ( GS_Data[GetRealmName()].Players[Name] ) then 
+			PreviousRecord = GS_Data[GetRealmName()].Players[Name]; 
+		end 
+		NotifyInspect("mouseover"); 
+		GearScore_GetScore(Name, "mouseover"); 
+		--GS_Data[GetRealmName()]["CurrentPlayer"] = GS_Data[GetRealmName()]["Players"][Name]
+		if not ( GearScore_IsRecordTheSame(GS_Data[GetRealmName()].Players[Name], PreviousRecord) ) then 
+			GearScore_Send(Name, "ALL"); 
+		end
 	end
  	if ( GS_Data[GetRealmName()].Players[Name] ) and ( GS_Data[GetRealmName()].Players[Name].GearScore > 0 ) and ( GS_Settings["Player"] == 1 ) then 
 		local Red, Blue, Green = GearScore_GetQuality(GS_Data[GetRealmName()].Players[Name].GearScore)
@@ -592,8 +615,6 @@ function GearScore_HookSetUnit(arg1, arg2)
 		end
 		
 		if ( GS_Settings["Detail"] == 1 ) then GearScore_SetDetails(GameTooltip, Name); end
-		if ( GS_Settings["Special"] == 1 ) and ( GS_Special[Name] ) then if ( GS_Special[Name]["Realm"] == Realm ) then GameTooltip:AddLine(GS_Special[GS_Special[Name].Type], 1, 0, 0 ); end; end
-		if ( GS_Settings["Special"] == 1 ) and ( GS_Special[GS_Data[GetRealmName()].Players[Name].Guild] ) then GameTooltip:AddLine(GS_Special[GS_Special[GS_Data[GetRealmName()].Players[Name].Guild].Type], 1, 0, 0 ); end
         local EnglishFaction, Faction = UnitFactionGroup("player")
 		--print(EnglishFaction)
 		if ( ( GS_Factions[GS_Data[GetRealmName()].Players[Name].Faction] ~= UnitFactionGroup("player") ) and ( GS_Settings["KeepFaction"] == -1 ) ) or ( ( GS_Data[GetRealmName()].Players[Name].Level < GS_Settings["MinLevel"] ) and ( Name ~= UnitName("player") ) ) then GS_Data[GetRealmName()].Players[Name] = nil; end

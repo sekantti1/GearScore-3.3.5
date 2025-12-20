@@ -37,7 +37,7 @@ function GearScore_OnEvent(GS_Nil, GS_EventName, GS_Prefix, GS_AddonMessage, GS_
 	if ( GS_EventName == "PLAYER_REGEN_DISABLED" ) then GS_PlayerIsInCombat = true; return; end
 	if ( GS_EventName == "EQUIPMENT_SWAP_PENDING" ) then GS_PlayerIsSwitchingGear = true; GS_PlayerSwappedGear = 0 return; end
 	if ( GS_EventName == "EQUIPMENT_SWAP_FINISHED" ) then
-    	GearScore_GetScore(UnitName("player"), "player");
+    	GearScore_GetScore(UnitName("player"), "player", 1);
 		GearScore_Send(UnitName("player"), "ALL")
 		local Red, Blue, Green = GearScore_GetQuality(GS_Data[GetRealmName()].Players[UnitName("player")].GearScore)
     	PersonalGearScore:SetText(GS_Data[GetRealmName()].Players[UnitName("player")].GearScore); PersonalGearScore:SetTextColor(Red, Green, Blue, 1)
@@ -76,7 +76,7 @@ function GearScore_OnEvent(GS_Nil, GS_EventName, GS_Prefix, GS_AddonMessage, GS_
 		
 	    if ( GS_PlayerIsSwitchingGear == true ) then GS_PlayerSwappedGear = GS_PlayerSwappedGear + 1 return; end
 	    if ( GS_PlayerSwappedGear ) then GS_PlayerSwappedGear = GS_PlayerSwappedGear - 1; if ( GS_PlayerSwappedGear == 0 ) then GS_PlayerSwappedGear = nil; end; return; end
-	    GearScore_GetScore(UnitName("player"), "player");
+	    GearScore_GetScore(UnitName("player"), "player", 1);
 		--GearScore_Send(UnitName("player"), "ALL")
 		local Red, Blue, Green = GearScore_GetQuality(GS_Data[GetRealmName()].Players[UnitName("player")].GearScore)
     	PersonalGearScore:SetText(GS_Data[GetRealmName()].Players[UnitName("player")].GearScore); PersonalGearScore:SetTextColor(Red, Green, Blue, 1)
@@ -85,7 +85,7 @@ function GearScore_OnEvent(GS_Nil, GS_EventName, GS_Prefix, GS_AddonMessage, GS_
 		if UnitName("target") then 	GS_Data[GetRealmName()]["CurrentPlayer"] = {}; end
 		if ( GS_DisplayFrame:IsVisible() ) then
 			if UnitName("target") then  
-				if CanInspect("target") then NotifyInspect("target"); GearScore_GetScore(UnitName("target"), "target"); end
+				if CanInspect("target") then NotifyInspect("target"); GearScore_GetScore(UnitName("target"), "target", 1); end
 				--ClearAchievementComparisonUnit(); SetAchievementComparisonUnit("target")				
 				--GearScore_DisplayUnit(UnitName("target"), 1); 
 				
@@ -164,7 +164,7 @@ function GearScore_OnEvent(GS_Nil, GS_EventName, GS_Prefix, GS_AddonMessage, GS_
   			if ( GS_Settings["Restrict"] == 2 ) then GearScore_SetLight(); end
   			if ( GS_Settings["Restrict"] == 3 ) then GearScore_SetHeavy(); end
   			if ( GetGuildInfo("player") ) then GuildRoster(); end
-  			GearScore_GetScore(UnitName("player"), "player"); GearScore_Send(UnitName("player"), "ALL")
+  			GearScore_GetScore(UnitName("player"), "player", 1); GearScore_Send(UnitName("player"), "ALL")
        	  	if ( GetGuildInfo("player") ) and ( GS_Settings["Developer"] ~= 1 )then SendAddonMessage( "GSY_Version", GS_Settings["OldVer"], "GUILD"); end
 --       	  	if ( GetBuildInfo() == "4.0.3") then 
 --       	  		print("ERROR: This version of GearScore is incompatible with Cataclysm. Please update at www.GearScoreAddon.com"); 
@@ -234,7 +234,7 @@ function GearScore_GetItemCode(ItemLink)
 end
 
 -------------------------- Get Mouseover Score -----------------------------------
-function GearScore_GetScore(Name, Target)
+function GearScore_GetScore(Name, Target, saveToDatabase)
 	if ( UnitIsPlayer(Target) ) then
 	    local PlayerClass, PlayerEnglishClass = UnitClass(Target);
 		local GearScore = 0; local PVPScore = 0; local ItemCount = 0; local LevelTotal = 0; local TitanGrip = 1; local TempEquip = {}; local TempPVPScore = 0
@@ -290,8 +290,12 @@ function GearScore_GetScore(Name, Target)
 			currentzone = "Unknown Location"
 		end
         local GuildName = GetGuildInfo(Target); if not ( GuildName ) then GuildName = "*"; else GuildName = GuildName; end
-		GS_Data[GetRealmName()].Players[Name] = { ["Name"] = Name, ["GearScore"] = floor(GearScore), ["PVP"] = 1, ["Level"] = UnitLevel(Target), ["Faction"] = GS_Factions[UnitFactionGroup(Target)], ["Sex"] = UnitSex(Target), ["Guild"] = GuildName,
-        ["Race"] = GS_Races[RaceEnglish], ["Class"] =  GS_Classes[ClassEnglish], ["Spec"] = 1, ["Location"] = GS_Zones[currentzone], ["Scanned"] = UnitName("player"), ["Date"] = GearScore_GetTimeStamp(), ["Average"] = floor((LevelTotal / ItemCount)+0.5), ["Equip"] = TempEquip}
+		if (saveToDatabase==1) then
+			GS_Data[GetRealmName()].Players[Name] = { ["Name"] = Name, ["GearScore"] = floor(GearScore), ["PVP"] = 1, ["Level"] = UnitLevel(Target), ["Faction"] = GS_Factions[UnitFactionGroup(Target)], ["Sex"] = UnitSex(Target), ["Guild"] = GuildName,
+        	["Race"] = GS_Races[RaceEnglish], ["Class"] =  GS_Classes[ClassEnglish], ["Spec"] = 1, ["Location"] = GS_Zones[currentzone], ["Scanned"] = UnitName("player"), ["Date"] = GearScore_GetTimeStamp(), ["Average"] = floor((LevelTotal / ItemCount)+0.5), ["Equip"] = TempEquip}
+		else
+			return floor(GearScore), floor((LevelTotal / ItemCount)+0.5);
+		end
 	end
 end
 
@@ -555,7 +559,10 @@ function GearScore_HookSetUnit(arg1, arg2)
 	if ( GS_PlayerIsInCombat ) then
 		return
 	end
-	
+
+	if not UnitIsPlayer("mouseover") then return end;
+    if UnitName("mouseover") == "UNKNOWN" then return end;
+
 	if ( InspectFrame and InspectFrame:IsShown() ) or ( Examiner and Examiner:IsShown() ) then
 		return
 	end
@@ -566,13 +573,15 @@ function GearScore_HookSetUnit(arg1, arg2)
 	local PreviousRecord = {}; 
 	local Age = "*";
 	local Realm = ""; 
+	local mouseoverGearScore
+	local mouseoverItemLevel
 	if UnitName("mouseover") == Name then 
 		_, Realm = UnitName("mouseover"); 
-			if not Realm then 
-				Realm = GetRealmName(); 
-			end; 
+		if not Realm then 
+			Realm = GetRealmName(); 
+		end; 
 	end
-	if ( CanInspect("mouseover") ) and ( UnitName("mouseover") == Name ) and ( UnitIsUnit("target", "mouseover") ) then 
+	if ( CanInspect("mouseover") ) and ( UnitName("mouseover") == Name ) then 
 		Age = "";
 		if (GS_DisplayFrame:IsVisible()) and GS_DisplayPlayer and UnitName("target") then 
 			if GS_DisplayPlayer == UnitName("target") then 
@@ -582,28 +591,56 @@ function GearScore_HookSetUnit(arg1, arg2)
 		if ( GS_Data[GetRealmName()].Players[Name] ) then 
 			PreviousRecord = GS_Data[GetRealmName()].Players[Name]; 
 		end 
-		NotifyInspect("mouseover"); 
-		GearScore_GetScore(Name, "mouseover"); 
-		--GS_Data[GetRealmName()]["CurrentPlayer"] = GS_Data[GetRealmName()]["Players"][Name]
+		-- save to database only when targeting
+		if ( UnitIsUnit("target", "mouseover")) then
+			NotifyInspect("mouseover"); 
+			GearScore_GetScore(Name, "mouseover", 1);
+		else
+			NotifyInspect("mouseover"); 
+			mouseoverGearScore, mouseoverItemLevel = GearScore_GetScore(Name, "mouseover", 0);
+		end
+
 		if not ( GearScore_IsRecordTheSame(GS_Data[GetRealmName()].Players[Name], PreviousRecord) ) then 
 			GearScore_Send(Name, "ALL"); 
 		end
 	end
- 	if ( GS_Data[GetRealmName()].Players[Name] ) and ( GS_Data[GetRealmName()].Players[Name].GearScore > 0 ) and ( GS_Settings["Player"] == 1 ) then 
-		local Red, Blue, Green = GearScore_GetQuality(GS_Data[GetRealmName()].Players[Name].GearScore)
+ 	if (( GS_Data[GetRealmName()].Players[Name] ) and ( GS_Data[GetRealmName()].Players[Name].GearScore > 0 ) and ( GS_Settings["Player"] == 1 )) or ( mouseoverGearScore and ( GS_Settings["Player"] == 1 )) then 
+		local Red, Blue, Green
+
+		if not mouseoverGearScore then
+			Red, Blue, Green = GearScore_GetQuality(GS_Data[GetRealmName()].Players[Name].GearScore)
+		else
+			Red, Blue, Green = GearScore_GetQuality(mouseoverGearScore)
+		end
+
 		if ( GS_Settings["Level"] == 1 ) then 
-			GameTooltip:AddDoubleLine(Age.."GearScore: "..GS_Data[GetRealmName()].Players[Name].GearScore, "(iLevel: "..GS_Data[GetRealmName()].Players[Name].Average..")", Red, Green, Blue, Red, Green, Blue)
+			if not mouseoverGearScore then
+				GameTooltip:AddDoubleLine(Age.."GearScore: "..GS_Data[GetRealmName()].Players[Name].GearScore, "(iLevel: "..GS_Data[GetRealmName()].Players[Name].Average..")", Red, Green, Blue, Red, Green, Blue)
+			else
+				GameTooltip:AddDoubleLine(Age.."GearScore: "..mouseoverGearScore, "(iLevel: "..mouseoverItemLevel..")", Red, Green, Blue, Red, Green, Blue)
+			end
+		
 			if ( GS_Settings["Date2"] == 1 ) and ( Age == "*" ) then 
-				local NoWDate, DateRed, DateGreen, DateBlue = GearScore_GetAge(GS_Data[GetRealmName()].Players[Name].Date); 
+				if not mouseoverGearScore then
+					local NoWDate, DateRed, DateGreen, DateBlue = GearScore_GetAge(GS_Data[GetRealmName()].Players[Name].Date); 
 				--print(GearScore_GetAge(GS_Data[GetRealmName()].Players[Name].Date));
 				GameTooltip:AddLine(NoWDate, DateRed, DateGreen, DateBlue);
+				end
 			end
 		else
-			GameTooltip:AddLine(Age.."GearScore: "..GS_Data[GetRealmName()].Players[Name].GearScore, Red, Green, Blue)
-			if ( GS_Settings["Date2"] == 1 ) and ( Age == "*" ) then 
-				local NoWDate, DateRed, DateGreen, DateBlue = GearScore_GetAge(GS_Data[GetRealmName()].Players[Name].Date); 
-				--print(GearScore_GetAge(GS_Data[GetRealmName()].Players[Name].Date));
-				GameTooltip:AddLine(NoWDate, DateRed, DateGreen, DateBlue); 
+			if not mouseoverGearScore then
+				GameTooltip:AddLine(Age.."GearScore: "..GS_Data[GetRealmName()].Players[Name].GearScore, Red, Green, Blue)
+				if ( GS_Settings["Date2"] == 1 ) and ( Age == "*" ) then 
+					local NoWDate, DateRed, DateGreen, DateBlue = GearScore_GetAge(GS_Data[GetRealmName()].Players[Name].Date); 
+					--print(GearScore_GetAge(GS_Data[GetRealmName()].Players[Name].Date));
+					GameTooltip:AddLine(NoWDate, DateRed, DateGreen, DateBlue); 
+				end
+			else
+				GameTooltip:AddLine(Age.."GearScore: "..mouseoverGearScore, Red, Green, Blue)
+				--if ( GS_Settings["Date2"] == 1 ) and ( Age == "*" ) then 
+					--local NoWDate, DateRed, DateGreen, DateBlue = GearScore_GetAge(GS_Data[GetRealmName()].Players[Name].Date); 
+					--print(GearScore_GetAge(GS_Data[GetRealmName()].Players[Name].Date));
+					--GameTooltip:AddLine(NoWDate, DateRed, DateGreen, DateBlue); 
 			end
 		end
 		if ( GS_Settings["Compare"] == 1 ) then
@@ -614,10 +651,17 @@ function GearScore_HookSetUnit(arg1, arg2)
 			if ( MyGearScore   == TheirGearScore   ) then GameTooltip:AddDoubleLine("YourScore: "..MyGearScore  , "(+0)", 0,1,1,0,1,1); end	
 		end
 		
-		if ( GS_Settings["Detail"] == 1 ) then GearScore_SetDetails(GameTooltip, Name); end
+		if ( GS_Settings["Detail"] == 1 ) then 
+			GearScore_SetDetails(GameTooltip, Name); 
+		end
+
         local EnglishFaction, Faction = UnitFactionGroup("player")
 		--print(EnglishFaction)
-		if ( ( GS_Factions[GS_Data[GetRealmName()].Players[Name].Faction] ~= UnitFactionGroup("player") ) and ( GS_Settings["KeepFaction"] == -1 ) ) or ( ( GS_Data[GetRealmName()].Players[Name].Level < GS_Settings["MinLevel"] ) and ( Name ~= UnitName("player") ) ) then GS_Data[GetRealmName()].Players[Name] = nil; end
+		if not mouseoverGearScore then
+			if ( ( GS_Factions[GS_Data[GetRealmName()].Players[Name].Faction] ~= UnitFactionGroup("player") ) and ( GS_Settings["KeepFaction"] == -1 ) ) or ( ( GS_Data[GetRealmName()].Players[Name].Level < GS_Settings["MinLevel"] ) and ( Name ~= UnitName("player") ) ) then 
+				GS_Data[GetRealmName()].Players[Name] = nil; 
+			end
+		end
 --		if ( ( GS_Data[GetRealmName()].Players[Name].Level < GS_Settings["MinLevel"] ) and ( Name ~= UnitName("player") ) ) then GS_Data[GetRealmName()].Players[Name] = nil; end
 		if ( GS_Settings["ShowHelp"] == 1 ) then GameTooltip: AddLine("Target this player and type /gs for detailed information. You can turn this msg off in the options screen. (/gs)", 1,1,1,1); end
 	end
@@ -760,7 +804,7 @@ function GearScore_OnEnter(Name, ItemSlot, Argument)
 	local OriginalOnEnter = GearScore_Original_SetInventoryItem(Name, ItemSlot, Argument); return OriginalOnEnter
 end
 function MyPaperDoll()
-	GearScore_GetScore(UnitName("player"), "player"); GearScore_Send(UnitName("player"), "ALL"); 
+	GearScore_GetScore(UnitName("player"), "player", 1); GearScore_Send(UnitName("player"), "ALL"); 
 	--SendAddonMessage( "GSY_Version", GS_Settings["OldVer"], "GUILD")
 	local Red, Blue, Green = GearScore_GetQuality(GS_Data[GetRealmName()].Players[UnitName("player")].GearScore)
     PersonalGearScore:SetText(GS_Data[GetRealmName()].Players[UnitName("player")].GearScore); PersonalGearScore:SetTextColor(Red, Green, Blue, 1)
@@ -885,7 +929,7 @@ end
 
 function GearScore_DisplayUnit(Name, Auto)
 	if not ( Name ) then Name = UnitName("player"); end
-	if ( Name == UnitName("player") ) then GearScore_GetScore(UnitName("player"), "player"); end
+	if ( Name == UnitName("player") ) then GearScore_GetScore(UnitName("player"), "player", 1); end
 	--or not ( GS_Data[GetRealmName()].Players[Name] ) then return; end
 	GearScore_HideDatabase(1)
 	GS_DisplayPlayer = Name

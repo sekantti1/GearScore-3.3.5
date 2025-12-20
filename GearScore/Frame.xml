@@ -224,7 +224,7 @@
 					if ( GS_Data[GetRealmName()].Players[UnitName(unit)] ) then
 						statValue = GS_Data[GetRealmName()].Players[UnitName(unit)].GearScore;
 					else
-						GearScore_GetScore(UnitName("player"), "player");
+						GearScore_GetScore(UnitName("player"), "player", 1);
 						if ( GS_Data[GetRealmName()].Players[UnitName(unit)] ) then 
 							statValue = GS_Data[GetRealmName()].Players[UnitName(unit)].GearScore; 
 						else
@@ -2151,11 +2151,9 @@
 					</Anchors>
 					<Color r="1" g="1" b="1" />
 				</FontString>
-
 			</Layer>
 		</Layers>
 	</Frame>
-									
 </Frames>
 		<Layers>
 			<Layer level="OVERLAY">

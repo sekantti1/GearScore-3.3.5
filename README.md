@@ -7,7 +7,8 @@ For WoW 3.3.5a
 **Whats new:**
 
 - Adds average GearScore for party/raids. This can be viewed with new commands /gs party, /gs raid and /gs group (all the commands are same).
-- Adds gems to inspect screen
+- Adds gems to inspect screen (/gs playername)
+- Mouseover GearScore is enabled and the data is saved only when targeting
 
 **Fixes:**
 

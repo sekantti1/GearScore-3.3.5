@@ -759,7 +759,13 @@ end
 -------------------------------------------------------------------------------
 
 -------------------------------------------------------------------------------
-function GearScore_HookSetItem() ItemName, ItemLink = GameTooltip:GetItem(); GearScore_HookItem(ItemName, ItemLink, GameTooltip); end
+function GearScore_HookSetItem() ItemName, ItemLink = GameTooltip:GetItem(); 
+	GearScore_HookItem(ItemName, ItemLink, GameTooltip); 
+end
+function GearScore_HookSetItemAtlasloot() ItemName, ItemLink = AtlasLootTooltip:GetItem(); 
+	GearScore_HookItem(ItemName, ItemLink, AtlasLootTooltip); 
+end
+
 function GearScore_HookRefItem() ItemName, ItemLink = ItemRefTooltip:GetItem(); GearScore_HookItem(ItemName, ItemLink, ItemRefTooltip); end
 function GearScore_HookCompareItem() ItemName, ItemLink = ShoppingTooltip1:GetItem(); GearScore_HookItem(ItemName, ItemLink, ShoppingTooltip1); end
 function GearScore_HookCompareItem2() ItemName, ItemLink = ShoppingTooltip2:GetItem(); GearScore_HookItem(ItemName, ItemLink, ShoppingTooltip2); end
@@ -1602,6 +1608,9 @@ f:RegisterEvent("PLAYER_REGEN_ENABLED")
 f:RegisterEvent("PLAYER_REGEN_DISABLED")
 GameTooltip:HookScript("OnTooltipSetUnit", GearScore_HookSetUnit)
 GameTooltip:HookScript("OnTooltipSetItem", GearScore_HookSetItem)
+if (AtlasLoot) then
+	AtlasLootTooltip:HookScript("OnTooltipSetItem", GearScore_HookSetItemAtlasloot)
+end
 ShoppingTooltip1:HookScript("OnTooltipSetItem", GearScore_HookCompareItem)
 ShoppingTooltip2:HookScript("OnTooltipSetItem", GearScore_HookCompareItem2)
 PaperDollFrame:HookScript("OnShow", MyPaperDoll)

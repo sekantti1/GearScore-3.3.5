@@ -796,8 +796,7 @@ function GearScore_HookItem(ItemName, ItemLink, Tooltip)
 					end
 				end
     		end
-    		if ( Tooltip ~= ShoppingTooltip1 ) and ( Tooltip ~= ShoppingTooltip2 ) then CalculateClasicItemScore(ItemLink, Tooltip, Red, Green, Blue); end
-           if ( GS_Settings["ML"] == 1 ) then GearScore_EquipCompare(Tooltip, ItemScore, EquipLoc, ItemLink); end
+			if ( GS_Settings["ML"] == 1 ) then GearScore_EquipCompare(Tooltip, ItemScore, EquipLoc, ItemLink); end
   		end
 	else
 	    if ( GS_Settings["Level"] == 1 ) and ( ItemLevel ) then
@@ -1032,17 +1031,8 @@ function GearScore_ShowOptions()
 	GS_DatabaseAgeSliderText:SetText("Keep data for: "..(GS_Settings["DatabaseAgeSlider"] or 30).." days.")
 	GS_DatabaseAgeSlider:SetValue(GS_Settings["DatabaseAgeSlider"] or 30)
 	GS_LevelEditBox:SetText(GS_Settings["MinLevel"])
-	--Set SpecScore Options--
-	local class, englishClass = UnitClass("player")
-	for i = 1,4 do _G["GS_SpecFontString"..i]:Hide(); _G["GS_SpecScoreCheck"..i]:Hide(); end
-    for i, v in ipairs(GearScoreClassSpecList[englishClass]) do
-    _G["GS_SpecFontString"..i]:SetText("Show "..GearScoreClassSpecList[englishClass][i].." SpecScores")
-   		_G["GS_SpecScoreCheck"..i]:SetText(GearScoreClassSpecList[englishClass][i])
-   		_G["GS_SpecFontString"..i]:Show(); _G["GS_SpecScoreCheck"..i]:Show()
-    	if not ( GS_Settings["ShowSpecScores"] ) then GS_Settings["ShowSpecScores"] = {}; end
-    	if not ( GS_Settings["ShowSpecScores"][GearScoreClassSpecList[englishClass][i]] ) then GS_Settings["ShowSpecScores"][GearScoreClassSpecList[englishClass][i]] = 1; end
-    	if ( GS_Settings["ShowSpecScores"][GearScoreClassSpecList[englishClass][i]] == 1 ) then _G["GS_SpecScoreCheck"..i]:SetChecked(1); else _G["GS_SpecScoreCheck"..i]:SetChecked(0); end
-    end
+
+
 	
 	GS_Displayed = 1; GS_OptionsFrame:Show(); GS_GearFrame:Hide(); GS_ExPFrame:Hide()
 end 
@@ -1067,14 +1057,6 @@ function GearScore_HideOptions()
 	GS_OptionsFrame:Hide()		
 	if (GS_Displayed) then GearScore_DisplayUnit(GS_DisplayPlayer); end
 	GS_Displayed = nil
-	
-	--Update Settings for new SpecScore Options--
-	local class, englishClass = UnitClass("player")
-	for i, v in ipairs(GearScoreClassSpecList[englishClass]) do
-		if ( _G["GS_SpecScoreCheck"..i]:GetChecked() ) then GS_Settings["ShowSpecScores"][GearScoreClassSpecList[englishClass][i]] = 1; else GS_Settings["ShowSpecScores"][GearScoreClassSpecList[englishClass][i]] = 0; end
-	end
-	
-	
 end
  
 

@@ -429,7 +429,6 @@ GS_DefaultSettings = {
 	["HCrusade"] = 4500,
 	["Crusade"] = 4100,
 	["DatabaseAgeSlider"] = 30,
-	["ShowSpecScores"] = {},
 }
 
 GS_TextureFiles = {

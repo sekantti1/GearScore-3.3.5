@@ -497,7 +497,7 @@
 		</Anchors>
 		<Frames>
 
-			<StatusBar name="GS_SpecBar1" id="1" inherits="GS_GearCheckBarTemplate">
+			<!-- <StatusBar name="GS_SpecBar1" id="1" inherits="GS_GearCheckBarTemplate">
 				<Anchors><Anchor point="TOPLEFT" relativeTo="GS_GearFrame" ><Offset><AbsDimension x="35" y="-50"/></Offset></Anchor></Anchors>
 			</StatusBar>
 			<StatusBar name="GS_SpecBar2" id="2" inherits="GS_GearCheckBarTemplate">
@@ -508,7 +508,7 @@
 			</StatusBar>
 			<StatusBar name="GS_SpecBar4" id="4" inherits="GS_GearCheckBarTemplate">
 				<Anchors><Anchor point="TOPLEFT" relativeTo="GS_GearFrame" ><Offset><AbsDimension x="35" y="-155"/></Offset></Anchor></Anchors>
-			</StatusBar>
+			</StatusBar> -->
 			<DressUpModel xsi:type="PlayerModel" name="GS_Model">
 				<Size>
 					<AbsDimension x="200" y="250" />
@@ -1173,67 +1173,6 @@
 				</Anchors>
 			</CheckButton>
 
-			<CheckButton name="GS_SpecScoreCheck1" inherits="UICheckButtonTemplate" text="CheckButton7">
-				<Scripts>
-					<OnEnter>
-						GameTooltip:SetOwner(self, "ANCHOR_Right")
-						GameTooltip:ClearLines(); 
-						GameTooltip:AddLine("Show "..self:GetText().." SpecScores",1,1,1)
-						GameTooltip:AddLine("Shows "..self:GetText().." SpecScores")
-						GameTooltip:AddLine("in item tooltips.")
-						GameTooltip:Show()
-					</OnEnter>		
-					<OnLeave>GameTooltip:Hide()</OnLeave>					
-				</Scripts>
-				<Size><AbsDimension x="20" y="20" /></Size>
-				<Anchors><Anchor point="TOPLEFT"><Offset x="500" y="-155" />	</Anchor></Anchors>
-			</CheckButton>
-			<CheckButton name="GS_SpecScoreCheck2" inherits="UICheckButtonTemplate" text="CheckButton7">
-				<Scripts>
-					<OnEnter>
-						GameTooltip:SetOwner(self, "ANCHOR_Right")
-						GameTooltip:ClearLines(); 
-						GameTooltip:AddLine("Show "..self:GetText().." SpecScores",1,1,1)
-						GameTooltip:AddLine("Shows "..self:GetText().." SpecScores")
-						GameTooltip:AddLine("in item tooltips.")
-						GameTooltip:Show()
-					</OnEnter>		
-					<OnLeave>GameTooltip:Hide()</OnLeave>					
-				</Scripts>
-				<Size><AbsDimension x="20" y="20" /></Size>
-				<Anchors><Anchor point="TOPLEFT"><Offset x="500" y="-175" />	</Anchor></Anchors>
-			</CheckButton>
-			<CheckButton name="GS_SpecScoreCheck3" inherits="UICheckButtonTemplate" text="CheckButton7">
-				<Scripts>
-					<OnEnter>
-						GameTooltip:SetOwner(self, "ANCHOR_Right")
-						GameTooltip:ClearLines(); 
-						GameTooltip:AddLine("Show "..self:GetText().." SpecScores",1,1,1)
-						GameTooltip:AddLine("Shows "..self:GetText().." SpecScores")
-						GameTooltip:AddLine("in item tooltips.")
-						GameTooltip:Show()
-					</OnEnter>		
-					<OnLeave>GameTooltip:Hide()</OnLeave>					
-				</Scripts>
-				<Size><AbsDimension x="20" y="20" /></Size>
-				<Anchors><Anchor point="TOPLEFT"><Offset x="500" y="-195" />	</Anchor></Anchors>
-			</CheckButton>
-			<CheckButton name="GS_SpecScoreCheck4" inherits="UICheckButtonTemplate" text="CheckButton7">
-				<Scripts>
-					<OnEnter>
-						GameTooltip:SetOwner(self, "ANCHOR_Right")
-						GameTooltip:ClearLines(); 
-						GameTooltip:AddLine("Show "..self:GetText().." SpecScores",1,1,1)
-						GameTooltip:AddLine("Shows "..self:GetText().." SpecScores")
-						GameTooltip:AddLine("in item tooltips.")
-						GameTooltip:Show()
-					</OnEnter>		
-					<OnLeave>GameTooltip:Hide()</OnLeave>					
-				</Scripts>
-				<Size><AbsDimension x="20" y="20" /></Size>
-				<Anchors><Anchor point="TOPLEFT"><Offset x="500" y="-215" />	</Anchor></Anchors>
-			</CheckButton>
-
 			<CheckButton name="GS_DetailCheck" inherits="UICheckButtonTemplate" text="CheckButton8">
 				<Scripts>
 					<OnEnter>
@@ -1515,18 +1454,6 @@
 					</Anchors>
 				</FontString>
 
-				<FontString name="GS_SpecFontString1" inherits="GameFontNormal" text="Show Restoration SpecScores" id="1" justifyH="RIGHT">/f
-					<Anchors><Anchor point="TOPRIGHT" relativepoint="TOPLEFT"><Offset x="486" y="-160" />	</Anchor></Anchors>
-				</FontString>
-				<FontString name="GS_SpecFontString2" inherits="GameFontNormal" text="Show Elemental SpecScores" id="2" justifyH="RIGHT">
-					<Anchors><Anchor point="TOPRIGHT" relativepoint="TOPLEFT"><Offset x="486" y="-180" />	</Anchor></Anchors>
-				</FontString>
-				<FontString name="GS_SpecFontString3" inherits="GameFontNormal" text="Show Enhancement SpecScores" id="3" justifyH="RIGHT">
-					<Anchors><Anchor point="TOPRIGHT" relativepoint="TOPLEFT"><Offset x="486" y="-200" />	</Anchor></Anchors>
-				</FontString>
-				<FontString name="GS_SpecFontString4" inherits="GameFontNormal" text="Show Tanking SpecScores" id="4" justifyH="RIGHT">
-					<Anchors><Anchor point="TOPRIGHT" relativepoint="TOPLEFT"><Offset x="486" y="-220" />	</Anchor></Anchors>
-				</FontString>
 				<FontString name="GS_FontString189" inherits="GameFontNormal" text="Show Data Age on Tooltip" justifyH="RIGHT">
 					<Anchors><Anchor point="TOPLEFT"><Offset x="330" y="-234" />	</Anchor></Anchors>
 				</FontString>

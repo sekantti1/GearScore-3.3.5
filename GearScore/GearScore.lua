@@ -187,18 +187,27 @@ function GearScore_OnEvent(GS_Nil, GS_EventName, GS_Prefix, GS_AddonMessage, GS_
 	end
 end
 
-function GearScore_CheckPartyGuild(Name)
+function GearScore_IsInPartyRaid(Name)
 	local Group = "party"
-	if UnitName("raid1") then Group = "raid"; else Group = "party"; end
+	if UnitName("raid1") then 
+		Group = "raid"; 
+	else 
+		Group = "party"; 
+	end
+
 	for i = 1, 40 do
-		if ( UnitName(Group..i) == Name ) then return true; else return false; end
+		if ( UnitName(Group..i) == Name ) then 
+			return true; 
+		else 
+			return false; 
+		end
 	end
 end
 
 function GearScore_ComposeRecord(tbl, GS_Sender)
 	local Name, GearScore, Date, Class, Average, Race, Faction, Location, Level, Sex, Guild, Scanned, Equip = tbl[1], tonumber(tbl[2]), tonumber(tbl[3]), tbl[4], tonumber(tbl[5]), tbl[6], tbl[7], tbl[8], tostring(tbl[9]), 1, tbl[10], GS_Sender, {}
 --	print(Name, GearScore, Date, Class, Average, Race, Faction, Location, Level, Sex, Guild, Scanned)
-	if Scanned == "LOLGearScore" or Scanned == "GearScoreBreaker" then return "InValid"; end
+	--if Scanned == "LOLGearScore" or Scanned == "GearScoreBreaker" then return "InValid"; end
 	if ( Scanned == " " ) then Scanned = "Unknown"; end
 	for i = 12, 30 do
 		if ( i ~= 15 ) then Equip[i-11] = tbl[i]; end
@@ -218,7 +227,7 @@ function GearScore_Prune()
             if v.Guild == "<>" or v.Guild == "" then GS_Data[GetRealmName()].Players[v.Name].Guild = "*"; end
 			if ( string.find(v.Guild, "<") ) then GS_Data[GetRealmName()].Players[v.Name].Guild = string.sub(v.Guild, 2, strlen(v.Guild) - 1); end
   			if ( (type(tonumber(v.Guild))) == "number" ) then GS_Data[GetRealmName()].Players[v.Name] = nil; end
-  			if v.Scanned == "LOLGearScore" then GS_Data[GetRealmName()].Players[v.Name] = nil; end
+  			--if v.Scanned == "LOLGearScore" then GS_Data[GetRealmName()].Players[v.Name] = nil; end
   			--if ( GearScore_GetDate(v.Date) > 30 )
 			   --if ( GearScore_GetDate(v.Date) > 30 ) then print("Old Record Found     "..i); end
 			  --if v.Guild == "<>" then GS_Data[GetRealmName()].Players[v.Name].Guild = "*"; end
@@ -583,6 +592,8 @@ function GearScore_HookSetUnit(arg1, arg2)
 	end
 	if ( CanInspect("mouseover") ) and ( UnitName("mouseover") == Name ) then 
 		Age = "";
+		local mouseoverGuild, _,_ = GetGuildInfo("mouseover")
+		local playerGuild, _,_ = GetGuildInfo("player")
 		if (GS_DisplayFrame:IsVisible()) and GS_DisplayPlayer and UnitName("target") then 
 			if GS_DisplayPlayer == UnitName("target") then 
 				return; 
@@ -593,6 +604,14 @@ function GearScore_HookSetUnit(arg1, arg2)
 		end 
 		-- save to database only when targeting
 		if ( UnitIsUnit("target", "mouseover")) then
+			NotifyInspect("mouseover"); 
+			GearScore_GetScore(Name, "mouseover", 1);
+		elseif (GetNumRaidMembers() > 1) or (GetNumPartyMembers() > 1) then
+			if GearScore_IsInPartyRaid then
+				NotifyInspect("mouseover"); 
+				GearScore_GetScore(Name, "mouseover", 1);
+			end
+		elseif (mouseoverGuild) and (mouseoverGuild == playerGuild) then
 			NotifyInspect("mouseover"); 
 			GearScore_GetScore(Name, "mouseover", 1);
 		else
@@ -643,13 +662,13 @@ function GearScore_HookSetUnit(arg1, arg2)
 					--GameTooltip:AddLine(NoWDate, DateRed, DateGreen, DateBlue); 
 			end
 		end
-		if ( GS_Settings["Compare"] == 1 ) then
-			local MyGearScore = GS_Data[GetRealmName()].Players[UnitName("player")].GearScore
-			local TheirGearScore = GS_Data[GetRealmName()].Players[Name].GearScore
-			if ( MyGearScore  > TheirGearScore  ) then GameTooltip:AddDoubleLine("YourScore: "..MyGearScore  , "(+"..(MyGearScore - TheirGearScore  )..")", 0,1,0, 0,1,0); end
-			if ( MyGearScore   < TheirGearScore   ) then GameTooltip:AddDoubleLine("YourScore: "..MyGearScore, "(-"..(TheirGearScore - MyGearScore  )..")", 1,0,0, 1,0,0); end	
-			if ( MyGearScore   == TheirGearScore   ) then GameTooltip:AddDoubleLine("YourScore: "..MyGearScore  , "(+0)", 0,1,1,0,1,1); end	
-		end
+		-- if ( GS_Settings["Compare"] == 1 ) then
+		-- 	local MyGearScore = GS_Data[GetRealmName()].Players[UnitName("player")].GearScore
+		-- 	local TheirGearScore = GS_Data[GetRealmName()].Players[Name].GearScore
+		-- 	if ( MyGearScore  > TheirGearScore  ) then GameTooltip:AddDoubleLine("YourScore: "..MyGearScore  , "(+"..(MyGearScore - TheirGearScore  )..")", 0,1,0, 0,1,0); end
+		-- 	if ( MyGearScore   < TheirGearScore   ) then GameTooltip:AddDoubleLine("YourScore: "..MyGearScore, "(-"..(TheirGearScore - MyGearScore  )..")", 1,0,0, 1,0,0); end	
+		-- 	if ( MyGearScore   == TheirGearScore   ) then GameTooltip:AddDoubleLine("YourScore: "..MyGearScore  , "(+0)", 0,1,1,0,1,1); end	
+		-- end
 		
 		if ( GS_Settings["Detail"] == 1 ) then 
 			GearScore_SetDetails(GameTooltip, Name); 
@@ -871,7 +890,7 @@ function GS_MANSET(Command)
 	if ( strlower(Command) == "describe" ) then GS_Settings["Description"] = GS_Settings["Description"] * -1; if ( GS_Settings["Description"] == 1 ) then print ("Descriptions: On"); else print ("Descriptions: Off"); end; return; end
 	if ( strlower(Command) == "level" ) then GS_Settings["Level"] = GS_Settings["Level"] * -1; if ( GS_Settings["Level"] == 1 ) then print ("Item Levels: On"); else print ("Item Levels: Off"); end; return; end
 	if ( strlower(Command) == "communicate" ) then GS_Settings["Communication"] = GS_Settings["Communication"] * -1; if ( GS_Settings["Communication"] == 1 ) then print ("Communication: On"); else print ("Communication: Off"); end; return; end
-	if ( strlower(Command) == "compare" ) then GS_Settings["Compare"] = GS_Settings["Compare"] * -1; if ( GS_Settings["Compare"] == 1 ) then print ("Comparisons: On"); else print ("Comparisons: Off"); end; return; end
+	--if ( strlower(Command) == "compare" ) then GS_Settings["Compare"] = GS_Settings["Compare"] * -1; if ( GS_Settings["Compare"] == 1 ) then print ("Comparisons: On"); else print ("Comparisons: Off"); end; return; end
     --if ( strlower(Command) == "average" ) then GS_Settings["Average"] = GS_Settings["Average"] * -1; if ( GS_Settings["Average"] == 1 ) then print ("Average ItemLevels: On"); else print ("Average ItemLevels: Off"); end; return; end
     if ( strlower(Command) == "date" ) then GS_Settings["Date"] = GS_Settings["Date"] * -1; if ( GS_Settings["Date"] == 1 ) then print ("Date/Time: On"); else print ("Date/Time: Off"); end; return; end
     if ( strlower(Command) == "chat" ) then GS_Settings["CHAT"] = GS_Settings["CHAT"] * -1; if ( GS_Settings["CHAT"] == 1 ) then print ("Chat Scores: On"); else print ("ChatScores: Off"); end; return; end
@@ -880,8 +899,8 @@ function GS_MANSET(Command)
     if ( strlower(Command) == "detail" ) then GS_Settings["Detail"] = GS_Settings["Detail"] * -1; if ( GS_Settings["Detail"] == 1 ) then print ("Details: On"); else print ("Details: Off"); end; return; end
     if ( strlower(Command) == "details" ) then GS_Settings["Detail"] = GS_Settings["Detail"] * -1; if ( GS_Settings["Detail"] == 1 ) then print ("Details: On"); else print ("Details: Off"); end; return; end
 	if ( strlower(Command) == "reset" ) then GS_Settings = GS_DefaultSettings; print("All Settings returned to Default"); return end
-	if ( strlower(Command) == "purge" ) then print ("WARNING! This will remove your entire GearScore Database. To continue please type '/gset purge 314159265"); return; end
-	if ( strlower(Command) == "purge 314159265" ) then GS_Data = nil; ReloadUI(); return; end
+	if ( strlower(Command) == "purge" ) then print ("WARNING! This will remove your entire GearScore Database. To continue please type '/gset purge 314"); return; end
+	if ( strlower(Command) == "purge 314" ) then GS_Data = nil; ReloadUI(); return; end
 	local tbl = {}
     for v in string.gmatch(Command, "[^ ]+") do tinsert(tbl, v); end
  	if ( strlower(tbl[1]) == "transmit" ) and (tbl[2]) then
